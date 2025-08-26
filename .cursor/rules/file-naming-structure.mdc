@@ -1,0 +1,245 @@
+---
+description: File naming conventions and project structure guidelines
+---
+
+# 파일 명명 규칙 및 프로젝트 구조
+
+## 디렉토리 명명 규칙
+- **소문자와 대시 사용**: `auth-wizard`, `user-profile`, `data-table`
+- **복수형 사용**: `components`, `hooks`, `utils`, `types`
+- **기능별 그룹화**: `(auth)`, `(dashboard)` (Next.js 라우트 그룹)
+
+## 파일 명명 패턴
+
+### 컴포넌트 파일
+```
+components/
+├── ui/                    # 재사용 가능한 UI 컴포넌트
+│   ├── button.tsx
+│   ├── input.tsx
+│   └── card.tsx
+├── auth-wizard/           # 기능별 컴포넌트 그룹
+│   ├── login-form.tsx
+│   ├── register-form.tsx
+│   └── auth-wizard.tsx    # 메인 컴포넌트
+└── data-table/
+    ├── data-table.tsx
+    ├── data-table-header.tsx
+    └── data-table-row.tsx
+```
+
+### 페이지 파일 (App Router)
+```
+app/
+├── (auth)/               # 라우트 그룹
+│   ├── login/
+│   │   └── page.tsx      # /login
+│   └── register/
+│       └── page.tsx      # /register
+├── dashboard/
+│   ├── layout.tsx        # 대시보드 레이아웃
+│   ├── page.tsx         # /dashboard
+│   ├── settings/
+│   │   └── page.tsx     # /dashboard/settings
+│   └── analytics/
+│       └── page.tsx     # /dashboard/analytics
+└── api/
+    ├── auth/
+    │   └── route.ts     # API 라우트
+    └── users/
+        └── route.ts
+```
+
+### 훅과 유틸리티
+```
+hooks/
+├── use-local-storage.ts   # 커스텀 훅
+├── use-debounce.ts
+└── use-fetch.ts
+
+utils/
+├── cn.ts                  # className 유틸리티
+├── format-date.ts
+└── api-client.ts
+
+lib/
+├── auth.ts               # 인증 설정
+├── database.ts           # 데이터베이스 설정
+└── validations.ts        # 스키마 검증
+```
+
+## 컴포넌트 파일 구조
+
+### 단일 컴포넌트 파일
+```typescript
+// components/user-profile.tsx
+import { User } from '@/types/user';
+
+interface UserProfileProps {
+  user: User;
+  isEditable?: boolean;
+}
+
+export function UserProfile({ user, isEditable = false }: UserProfileProps) {
+  // 컴포넌트 로직
+  return (
+    <div>
+      {/* JSX */}
+    </div>
+  );
+}
+```
+
+### 복합 컴포넌트 패턴
+```typescript
+// components/data-table/data-table.tsx
+export interface DataTableProps<T> {
+  data: T[];
+  columns: ColumnDef<T>[];
+}
+
+function DataTableRoot<T>({ data, columns }: DataTableProps<T>) {
+  return (
+    <div className="rounded-md border">
+      <DataTableHeader columns={columns} />
+      <DataTableBody data={data} columns={columns} />
+    </div>
+  );
+}
+
+function DataTableHeader<T>({ columns }: { columns: ColumnDef<T>[] }) {
+  // 헤더 로직
+}
+
+function DataTableBody<T>({ data, columns }: DataTableProps<T>) {
+  // 바디 로직
+}
+
+// 네임스페이스 패턴으로 export
+export const DataTable = {
+  Root: DataTableRoot,
+  Header: DataTableHeader,
+  Body: DataTableBody
+};
+
+// 또는 기본 export로 Root 제공
+export default DataTableRoot;
+```
+
+### 인덱스 파일 활용
+```typescript
+// components/ui/index.ts
+export { Button } from './button';
+export { Input } from './input';
+export { Card, CardHeader, CardContent } from './card';
+
+// 사용시
+import { Button, Input, Card } from '@/components/ui';
+```
+
+## 타입 정의 구조
+
+### 타입 파일 조직
+```
+types/
+├── index.ts              # 공통 타입 re-export
+├── auth.ts              # 인증 관련 타입
+├── user.ts              # 사용자 관련 타입
+├── api.ts               # API 응답 타입
+└── database.ts          # 데이터베이스 스키마 타입
+```
+
+### 타입 정의 예시
+```typescript
+// types/user.ts
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  avatar?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface UserProfile extends User {
+  bio?: string;
+  website?: string;
+  location?: string;
+}
+
+export type UserRole = 'admin' | 'user' | 'guest';
+
+export interface CreateUserData {
+  email: string;
+  name: string;
+  password: string;
+}
+
+// types/index.ts - 중앙 집중식 export
+export type { User, UserProfile, UserRole, CreateUserData } from './user';
+export type { AuthState, LoginCredentials } from './auth';
+```
+
+## 설정 파일 구조
+
+### 환경별 설정
+```
+config/
+├── database.ts           # 데이터베이스 설정
+├── auth.ts              # 인증 설정
+└── constants.ts         # 상수 정의
+
+env/
+├── .env.local           # 로컬 개발
+├── .env.development     # 개발 환경
+├── .env.staging         # 스테이징
+└── .env.production      # 프로덕션
+```
+
+## 테스트 파일 구조
+```
+__tests__/
+├── components/
+│   ├── button.test.tsx
+│   └── user-profile.test.tsx
+├── hooks/
+│   └── use-local-storage.test.ts
+└── utils/
+    └── format-date.test.ts
+
+# 또는 컴포넌트와 함께 위치
+components/
+├── button.tsx
+├── button.test.tsx
+├── user-profile.tsx
+└── user-profile.test.tsx
+```
+
+## Import 경로 최적화
+
+### Path Alias 활용
+```typescript
+// tsconfig.json에서 설정된 alias 사용
+import { Button } from '@/components/ui/button';
+import { User } from '@/types/user';
+import { cn } from '@/utils/cn';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+
+// 상대 경로는 같은 디렉토리 내에서만
+import { DataTableHeader } from './data-table-header';
+import { validateForm } from '../utils/validation';
+```
+
+## 명명 규칙 요약
+
+| 파일 유형 | 규칙 | 예시 |
+|-----------|------|------|
+| 컴포넌트 | `kebab-case.tsx` | `user-profile.tsx` |
+| 페이지 | `page.tsx` | `app/dashboard/page.tsx` |
+| 레이아웃 | `layout.tsx` | `app/dashboard/layout.tsx` |
+| API 라우트 | `route.ts` | `app/api/users/route.ts` |
+| 훅 | `use-*.ts` | `use-local-storage.ts` |
+| 유틸리티 | `kebab-case.ts` | `format-date.ts` |
+| 타입 | `kebab-case.ts` | `user-types.ts` |
+| 테스트 | `*.test.tsx` | `button.test.tsx` |
+| 디렉토리 | `kebab-case` | `auth-wizard/` |

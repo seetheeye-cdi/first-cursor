@@ -24,3 +24,83 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+
+
+
+/* 바이너리 글리치 효과 */
+@keyframes binaryGlitch {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+/* 펄스 효과 */
+@keyframes softPulse {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* 참치 꼬리 움직임 */
+@keyframes tailWag {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+}
+
+/* 참치 수영 애니메이션 */
+@keyframes tunaSwim {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-5px) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+  75% {
+    transform: translateY(5px) rotate(2deg);
+  }
+}
+
+/* 유틸리티 클래스 */
+.animate-tuna-swim {
+  animation: tunaSwim 3s ease-in-out infinite;
+}
+
+.animate-wave {
+  animation: wave 4s ease-in-out infinite;
+}
+
+.animate-wave-flow {
+  animation: waveFlow 8s linear infinite;
+}
+
+.animate-binary-glitch {
+  animation: binaryGlitch 0.3s ease-in-out infinite;
+}
+
+.animate-soft-pulse {
+  animation: softPulse 2s ease-in-out infinite;
+}
+
+.animate-tail-wag {
+  animation: tailWag 1s ease-in-out infinite;
+}

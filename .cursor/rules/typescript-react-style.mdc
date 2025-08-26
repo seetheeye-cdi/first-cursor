@@ -1,0 +1,104 @@
+---
+globs: *.ts,*.tsx
+---
+
+# TypeScript & React 코딩 스타일 가이드
+
+## 코드 스타일과 구조
+- 간결하고 기술적인 TypeScript 코드 작성, 정확한 예제 제공
+- 함수형 및 선언적 프로그래밍 패턴 사용, 클래스 지양
+- 코드 중복보다는 반복과 모듈화 선호
+- 보조 동사를 포함한 설명적 변수명 사용 (예: isLoading, hasError)
+
+## 파일 구조
+파일 내 구조 순서:
+1. Exported component
+2. Subcomponents  
+3. Helper functions
+4. Static content
+5. Types/Interfaces
+
+## 명명 규칙
+- 디렉토리: 소문자와 대시 사용 (예: `components/auth-wizard`)
+- 컴포넌트: named export 선호
+- 변수: `camelCase` 사용
+- 상수: `UPPER_SNAKE_CASE` 사용
+- Boolean 변수: 보조 동사 사용 (`isLoading`, `hasError`, `canEdit`)
+
+## TypeScript 사용법
+- 모든 코드에 TypeScript 사용
+- **인터페이스를 타입보다 선호**
+- **Enum 지양, Map 사용**
+- 함수형 컴포넌트와 TypeScript 인터페이스 사용
+
+```typescript
+// 올바른 예시
+interface UserProps {
+  name: string;
+  isActive: boolean;
+}
+
+// Enum 대신 Map 사용
+const UserRole = {
+  ADMIN: 'admin',
+  USER: 'user',
+  GUEST: 'guest'
+} as const;
+
+type UserRoleType = typeof UserRole[keyof typeof UserRole];
+```
+
+## 문법과 포맷팅
+- 순수 함수에는 `function` 키워드 사용
+- 조건문에서 불필요한 중괄호 지양, 간단한 구문은 간결한 문법 사용
+- 선언적 JSX 사용
+
+```typescript
+// 올바른 함수 선언
+function calculateTotal(items: Item[]): number {
+  return items.reduce((sum, item) => sum + item.price, 0);
+}
+
+// 간결한 조건문
+if (isLoading) return <Spinner />;
+```
+
+## 컴포넌트 구조
+```typescript
+interface ComponentProps {
+  title: string;
+  isVisible: boolean;
+}
+
+export function ComponentName({ title, isVisible }: ComponentProps) {
+  // 1. Hooks
+  const [data, setData] = useState<Data[]>([]);
+  
+  // 2. Event handlers
+  function handleSubmit(event: FormEvent) {
+    // 핸들러 로직
+  }
+  
+  // 3. Early returns
+  if (!isVisible) return null;
+  
+  // 4. Render
+  return (
+    <div>
+      <h1>{title}</h1>
+    </div>
+  );
+}
+```
+
+## Import/Export 순서
+1. React 관련
+2. Next.js 관련  
+3. 외부 라이브러리
+4. 내부 모듈 (`@/`로 시작)
+5. 상대 경로 import
+
+## JSX 스타일
+- 선언적 JSX 사용
+- Boolean prop은 축약형: `<Button disabled />` 
+- 간결한 조건부 렌더링: `isLoading && <Spinner />`

@@ -1,0 +1,298 @@
+---
+description: Performance optimization best practices
+---
+
+# 성능 최적화 가이드
+
+## 핵심 성능 원칙
+
+### 1. 'use client' 최소화 전략
+```typescript
+// ❌ 잘못된 예시 - 불필요한 클라이언트 컴포넌트
+'use client';
+export function UserList({ users }: { users: User[] }) {
+  return (
+    <div>
+      {users.map(user => <div key={user.id}>{user.name}</div>)}
+    </div>
+  );
+}
+
+// ✅ 올바른 예시 - 서버 컴포넌트 사용
+export function UserList({ users }: { users: User[] }) {
+  return (
+    <div>
+      {users.map(user => <div key={user.id}>{user.name}</div>)}
+    </div>
+  );
+}
+```
+
+### 2. React Server Components (RSC) 최대 활용
+```typescript
+// 서버에서 데이터 페칭
+export async function ProductPage({ params }: { params: { id: string } }) {
+  const product = await fetchProduct(params.id);
+  
+  return (
+    <div>
+      <ProductDetails product={product} />
+      <Suspense fallback={<div>Loading reviews...</div>}>
+        <ProductReviews productId={params.id} />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+### 3. Suspense 활용 패턴
+```typescript
+import { Suspense } from 'react';
+
+export function DashboardPage() {
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      
+      {/* 각 섹션을 개별적으로 로딩 */}
+      <Suspense fallback={<AnalyticsSkeleton />}>
+        <AnalyticsSection />
+      </Suspense>
+      
+      <Suspense fallback={<ChartSkeleton />}>
+        <ChartSection />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+## 동적 로딩 전략
+
+### 비중요 컴포넌트 지연 로딩
+```typescript
+import dynamic from 'next/dynamic';
+
+// 대용량 컴포넌트는 동적 로딩
+const ChartComponent = dynamic(
+  () => import('./ChartComponent'),
+  { 
+    loading: () => <ChartSkeleton />,
+    ssr: false // 브라우저에서만 렌더링
+  }
+);
+
+// 모달 같은 조건부 컴포넌트
+const Modal = dynamic(() => import('./Modal'), {
+  ssr: false
+});
+
+export function Dashboard() {
+  const [showModal, setShowModal] = useState(false);
+  
+  return (
+    <div>
+      <ChartComponent />
+      {showModal && <Modal onClose={() => setShowModal(false)} />}
+    </div>
+  );
+}
+```
+
+## 이미지 최적화
+
+### Next.js Image 컴포넌트 활용
+```typescript
+import Image from 'next/image';
+
+export function OptimizedImage() {
+  return (
+    <>
+      {/* 중요한 이미지 - priority 설정 */}
+      <Image
+        src="/hero-image.webp"
+        alt="Hero image"
+        width={1200}
+        height={800}
+        priority
+        placeholder="blur"
+        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyuQmemADOe4lG+jqKFcNJzPmCBtlQxFEtGdP8AJNqbP6QHE1U6p3fDUP2cCr7I8m2zLQ/7rN/tKLDXe8dP1f//2Q=="
+      />
+      
+      {/* 일반 이미지 - 지연 로딩 */}
+      <Image
+        src="/gallery-image.webp"
+        alt="Gallery image"
+        width={400}
+        height={300}
+        loading="lazy"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </>
+  );
+}
+```
+
+## 상태 관리 최적화
+
+### useEffect와 useState 최소화
+```typescript
+// ❌ 불필요한 클라이언트 상태
+'use client';
+export function UserProfile({ userId }: { userId: string }) {
+  const [user, setUser] = useState<User | null>(null);
+  
+  useEffect(() => {
+    fetchUser(userId).then(setUser);
+  }, [userId]);
+  
+  if (!user) return <div>Loading...</div>;
+  return <div>{user.name}</div>;
+}
+
+// ✅ 서버 컴포넌트에서 직접 데이터 페칭
+export async function UserProfile({ userId }: { userId: string }) {
+  const user = await fetchUser(userId);
+  return <div>{user.name}</div>;
+}
+```
+
+### URL 상태 관리 (nuqs 사용)
+```typescript
+import { useQueryState } from 'nuqs';
+
+export function SearchPage() {
+  const [query, setQuery] = useQueryState('q');
+  const [category, setCategory] = useQueryState('category');
+  
+  return (
+    <div>
+      <input 
+        value={query || ''} 
+        onChange={(e) => setQuery(e.target.value)}
+      />
+      <select 
+        value={category || ''} 
+        onChange={(e) => setCategory(e.target.value)}
+      >
+        <option value="">All Categories</option>
+        <option value="tech">Technology</option>
+      </select>
+    </div>
+  );
+}
+```
+
+## Web Vitals 최적화
+
+### LCP (Largest Contentful Paint) 개선
+```typescript
+// 중요한 콘텐츠는 서버에서 렌더링
+export async function ArticlePage({ slug }: { slug: string }) {
+  const article = await fetchArticle(slug);
+  
+  return (
+    <article>
+      {/* LCP 요소 최적화 */}
+      <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
+      <Image
+        src={article.heroImage}
+        alt={article.title}
+        width={800}
+        height={400}
+        priority // LCP 이미지는 priority 설정
+      />
+      <div dangerouslySetInnerHTML={{ __html: article.content }} />
+    </article>
+  );
+}
+```
+
+### CLS (Cumulative Layout Shift) 방지
+```typescript
+// 이미지 크기 명시로 레이아웃 시프트 방지
+<Image
+  src="/banner.webp"
+  alt="Banner"
+  width={1200}
+  height={300}
+  style={{ aspectRatio: '4/1' }} // 명시적 비율 설정
+/>
+
+// Skeleton UI로 콘텐츠 로딩 중 레이아웃 안정화
+function ProductCardSkeleton() {
+  return (
+    <div className="w-full h-64 bg-gray-200 animate-pulse rounded-lg">
+      <div className="p-4 space-y-3">
+        <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+        <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+      </div>
+    </div>
+  );
+}
+```
+
+### FID (First Input Delay) 개선
+```typescript
+// 무거운 계산은 Web Worker로 처리
+const heavyCalculation = dynamic(
+  () => import('./HeavyCalculation'),
+  { ssr: false }
+);
+
+// 이벤트 핸들러 최적화
+function OptimizedButton({ onClick }: { onClick: () => void }) {
+  const handleClick = useCallback(() => {
+    // 무거운 작업은 setTimeout으로 지연
+    setTimeout(onClick, 0);
+  }, [onClick]);
+  
+  return <button onClick={handleClick}>Click me</button>;
+}
+```
+
+## 메모이제이션 전략
+
+### React.memo 사용
+```typescript
+interface ProductCardProps {
+  product: Product;
+  onSelect: (id: string) => void;
+}
+
+export const ProductCard = React.memo(function ProductCard({ 
+  product, 
+  onSelect 
+}: ProductCardProps) {
+  return (
+    <div onClick={() => onSelect(product.id)}>
+      <h3>{product.name}</h3>
+      <p>${product.price}</p>
+    </div>
+  );
+});
+```
+
+### useMemo와 useCallback 적절한 사용
+```typescript
+function ExpensiveComponent({ items, filter }: { items: Item[]; filter: string }) {
+  // 비싼 계산은 메모이제이션
+  const filteredItems = useMemo(() => 
+    items.filter(item => item.name.includes(filter)),
+    [items, filter]
+  );
+  
+  // 안정적인 참조가 필요한 함수
+  const handleItemClick = useCallback((id: string) => {
+    // 핸들러 로직
+  }, []);
+  
+  return (
+    <div>
+      {filteredItems.map(item => 
+        <ItemCard key={item.id} item={item} onClick={handleItemClick} />
+      )}
+    </div>
+  );
+}
+```
