@@ -54,7 +54,7 @@ export function ProblemSection() {
                       극단적 소통 방식
                     </h4>
                     <p className="text-gray-400 text-sm leading-relaxed">
-                      대통령이 "소통을 위해" 계엄령을 선택하는 현실
+                      대통령이 &ldquo;소통을 위해&rdquo; 계엄령을 선택하는 현실
                     </p>
                     <div className="mt-2 h-px bg-gradient-to-r from-red-500/20 to-transparent"></div>
                   </div>
