@@ -36,9 +36,9 @@ export function HeroSection() {
         </div>
       </nav>
 
-      {/* 중앙 참치 로고 - SVG 애니메이션 */}
-      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-30 hover:opacity-50 transition-opacity duration-500">
-        <TunaLogo size="large" animated={true} />
+      {/* 중앙 참치 로고 - 원본 이미지 그대로 */}
+      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        <TunaLogo size="large" className="opacity-30 hover:opacity-50 transition-opacity duration-500" />
       </div>
 
       <div className="max-w-7xl mx-auto flex items-center justify-center min-h-screen relative z-10">

@@ -122,8 +122,8 @@ export function SolutionSection() {
               <h3 className="text-2xl font-bold mb-4">참치상사 솔루션</h3>
               
               {/* 참치 로고 - 원본 사용 */}
-              <div className="flex justify-center">
-                <TunaLogo size="small" animated={false} background="white" />
+              <div className="flex justify-center bg-black p-4">
+                <TunaLogo size="small" />
               </div>
             </div>
             
