@@ -1,6 +1,12 @@
+'use client';
+
+import { useState } from 'react';
 import { TunaLogo } from './tuna-logo';
+import { CoffeeChatModal } from './coffee-chat-modal';
 
 export function HeroSection() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <section className="min-h-screen bg-black text-white px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* 바이너리 코드 배경 애니메이션 */}
@@ -113,16 +119,19 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* CTA 버튼 */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-12">
-            <button className="bg-white text-black font-bold py-4 px-12 hover:bg-red-500 hover:text-white transition-all duration-300">
-              참치상사와 커피챗하기 →
-            </button>
-            
-            <button className="border border-white text-white hover:bg-white hover:text-black font-medium py-4 px-12 transition-all duration-300">
-              MORE INFO
-            </button>
-          </div>
+                            {/* CTA 버튼 */}
+                  <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-12">
+                    <button 
+                      onClick={() => setIsModalOpen(true)}
+                      className="bg-white text-black font-bold py-4 px-12 hover:bg-red-500 hover:text-white transition-all duration-300"
+                    >
+                      참치상사와 커피챗하기 →
+                    </button>
+                    
+                    <button className="border border-white text-white hover:bg-white hover:text-black font-medium py-4 px-12 transition-all duration-300">
+                      MORE INFO
+                    </button>
+                  </div>
         </div>
       </div>
 
@@ -141,6 +150,12 @@ export function HeroSection() {
           </div>
         </div>
       </div>
+      
+      {/* 커피챗 신청 모달 */}
+      <CoffeeChatModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </section>
   );
 }
